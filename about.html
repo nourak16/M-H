@@ -4,15 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M&H | Elevated Essentials</title>
-    <!-- Google Fonts: Playfair Display for elegance, Inter for UI -->
+    <title>About Us | M&H</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    
-    <!-- Using ./ ensures explicit relative pathing for subdirectories -->
     <link rel="stylesheet" href="./style.css">
-<link rel="stylesheet" href="/index.css">
 </head>
 <body id="body">
 
@@ -33,48 +29,25 @@
     <!-- Header -->
     <header class="header" id="header">
         <div class="container header-inner">
-            <!-- Mobile Menu Toggle -->
             <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Open menu">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="3" y1="12" x2="21" y2="12"></line>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
 
-            <a class="logo" href="/" onclick="event.preventDefault(); showHome()">M&H</a>
+            <a class="logo" href="index.html">M&H</a>
             
-            <!-- Main Navigation (Desktop & Mobile Dropdown) -->
             <nav class="nav-wrapper" id="nav-wrapper">
                 <ul class="nav-menu">
-                    <li><a class="nav-link active" id="nav-home" href="/" onclick="event.preventDefault(); showHome()">Home</a></li>
+                    <li><a class="nav-link" href="index.html">Home</a></li>
                     
                     <li class="has-dropdown" id="products-dropdown-li">
-                        <a class="nav-link" onclick="toggleMobileDropdown(event)">Products</a>
-                        <ul class="dropdown-menu">
-                            <li><a onclick="filterProducts('All'); showHome();">All</a></li>
-                            <li><a onclick="filterProducts('Sale'); showHome();" style="color: #D32F2F;">Sale</a></li>
-                            <li><a onclick="filterProducts('Tops'); showHome();">Tops</a></li>
-                            <li><a onclick="filterProducts('Bottoms'); showHome();">Bottoms</a></li>
-                            <li><a onclick="filterProducts('Dresses'); showHome();">Dresses</a></li>
-                            <li><a onclick="filterProducts('Outerwear'); showHome();">Outerwear</a></li>
-                            <li><a onclick="filterProducts('Accessories'); showHome();">Accessories</a></li>
-                        </ul>
+                        <a class="nav-link" href="index.html">Products</a>
                     </li>
                     
-                    <li><a class="nav-link" id="nav-about" href="/about" onclick="event.preventDefault(); showAbout()">About Us</a></li>
+                    <li><a class="nav-link active" href="about.html">About Us</a></li>
                 </ul>
             </nav>
 
             <nav class="nav-actions">
-                <!-- Search Trigger -->
-                <button class="search-trigger" onclick="toggleSearch()" aria-label="Toggle search">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </button>
-
                 <!-- Favorites Trigger -->
                 <button class="favorites-trigger" onclick="openFavoritesModal()" aria-label="Open Favorites">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -84,9 +57,7 @@
                 </button>
 
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                 </button>
                 <button class="cart-trigger" onclick="toggleCart()">
                     <span>Cart</span>
@@ -94,59 +65,11 @@
                 </button>
             </nav>
         </div>
-
-        <!-- Search Overlay (Hidden by default) -->
-        <div id="search-overlay" class="search-overlay">
-            <div class="container search-container">
-                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" id="search-input" placeholder="Search for products..." oninput="handleSearch(this.value)">
-                <button class="search-close" onclick="toggleSearch()">&times;</button>
-            </div>
-        </div>
     </header>
 
-    <!-- HOME VIEW -->
-    <div id="home-view">
-        <!-- Hero -->
-        <section class="hero">
-            <div class="hero-content">
-                <span class="hero-subtitle">Spring / Summer 2024</span>
-                <h2>Natural. Timeless. You.</h2>
-                <button class="btn-hero" onclick="scrollToGrid()">Explore Collection</button>
-            </div>
-        </section>
-
-        <!-- Main Content -->
-        <main class="container" id="shop-section">
-            <div class="section-header reveal-on-scroll">
-                <h3 id="collection-title">New Arrivals</h3>
-                <p>Thoughtfully designed pieces for the contemporary wardrobe. Sustainable, timeless, and effortlessly chic.</p>
-            </div>
-
-            <!-- Shop Toolbar (Sort & Count) -->
-            <div class="shop-toolbar reveal-on-scroll">
-                <span id="product-count" class="product-count-text">Loading...</span>
-                <div class="sort-wrapper">
-                    <select id="sort-select" onchange="handleSort(this.value)" aria-label="Sort products">
-                        <option value="default">Sort by: Recommended</option>
-                        <option value="price-asc">Price: Low to High</option>
-                        <option value="price-desc">Price: High to Low</option>
-                    </select>
-                    <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </div>
-            </div>
-
-            <div id="product-grid" class="product-grid">
-                <!-- JS Injection -->
-            </div>
-        </main>
-    </div>
-
-    <!-- ABOUT VIEW (Hidden by default) -->
-    <div id="about-view" style="display: none;">
+    <!-- About Main Content -->
+    <!-- Removed main 'container' wrapper to allow full-width sections -->
+    <main>
         <section class="about-hero reveal-on-scroll">
             <span class="subtitle">Our Story</span>
             <h1>Crafting Confidence</h1>
@@ -227,9 +150,9 @@
                 </div>
             </section>
         </div>
-    </div>
+    </main>
 
-    <!-- Footer (Minimalist) -->
+    <!-- Minimalist Footer -->
     <footer class="main-footer minimalist reveal-on-scroll" id="footer">
         <div class="container footer-bottom">
             <div class="footer-links">
@@ -240,49 +163,30 @@
         </div>
     </footer>
 
-    <!-- Product Details Modal -->
-    <div id="product-modal" class="modal-overlay" onclick="closeModal(event)">
-        <div class="modal-content product-modal-content" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeModal()">&times;</button>
-            <div class="modal-image-col">
-                <img id="modal-img" src="" alt="">
-            </div>
-            <div class="modal-details-col">
-                <span id="modal-category" class="product-category"></span>
-                <h3 id="modal-title" class="modal-title"></h3>
-                <span id="modal-price" class="modal-price"></span>
-                <p id="modal-desc" class="modal-desc"></p>
-                
-                <div class="size-selector">
-                    <span class="size-label">Select Size</span>
-                    <div id="modal-sizes" class="size-options">
-                        <!-- JS Injection -->
-                    </div>
-                </div>
-
-                <!-- Quantity Selector -->
-                <div class="modal-qty-wrapper">
-                    <span class="size-label">Quantity</span>
-                    <div class="modal-qty-controls">
-                        <button class="modal-qty-btn" onclick="updateModalQty(-1)">−</button>
-                        <span id="modal-qty-val" class="modal-qty-val">1</span>
-                        <button class="modal-qty-btn" onclick="updateModalQty(1)">+</button>
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button class="btn-modal-add" onclick="addToCartFromModal()">
-                        Add to Cart
-                    </button>
-                    <button class="btn-modal-buy" onclick="buyNowFromModal()">
-                        Buy Now
-                    </button>
-                </div>
-            </div>
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay" onclick="toggleCart()"></div>
+    <aside class="cart-sidebar">
+        <div class="cart-header">
+            <h4>Shopping Cart</h4>
+            <button class="close-cart" onclick="toggleCart()">&times;</button>
         </div>
-    </div>
+        
+        <div id="cart-items" class="cart-body">
+            <!-- JS Injection -->
+        </div>
 
-    <!-- Checkout Modal -->
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Subtotal</span>
+                <span id="cart-total">$0.00</span>
+            </div>
+            <button id="whatsapp-btn" class="btn-whatsapp" onclick="openCheckoutModal()">
+                Confirm Your Order in WhatsApp
+            </button>
+        </div>
+    </aside>
+
+    <!-- Checkout Modal (Required for Cart functionality) -->
     <div id="checkout-modal" class="modal-overlay" onclick="closeCheckoutModal(event)">
         <div class="modal-content checkout-modal-content" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
@@ -290,7 +194,6 @@
                 <span class="checkout-subtitle">FINALIZE</span>
                 <h3>Delivery details</h3>
             </div>
-            
             <form id="checkout-form" onsubmit="event.preventDefault(); processCheckout();">
                 <div class="form-group">
                     <label>Name</label>
@@ -311,7 +214,6 @@
                         <option value="Bekaa">Bekaa ($8.00)</option>
                     </select>
                 </div>
-
                 <div class="checkout-summary">
                     <span>Delivery</span>
                     <span id="checkout-delivery-display">--</span>
@@ -320,12 +222,8 @@
                     <span>Order total</span>
                     <span id="checkout-total-display">$0.00</span>
                 </div>
-
                 <p class="checkout-note">We confirm everything via WhatsApp before shipping.</p>
-
-                <button type="submit" class="btn-checkout-submit">
-                    Send order via WhatsApp
-                </button>
+                <button type="submit" class="btn-checkout-submit">Send order via WhatsApp</button>
             </form>
         </div>
     </div>
@@ -381,35 +279,7 @@
         </div>
     </div>
 
-    <!-- Cart Sidebar -->
-    <div class="cart-overlay" onclick="toggleCart()"></div>
-    <aside class="cart-sidebar">
-        <div class="cart-header">
-            <h4>Shopping Cart</h4>
-            <button class="close-cart" onclick="toggleCart()">&times;</button>
-        </div>
-        
-        <div id="cart-items" class="cart-body">
-            <!-- JS Injection -->
-        </div>
-
-        <div class="cart-footer">
-            <div class="cart-total-row">
-                <span>Subtotal</span>
-                <span id="cart-total">$0.00</span>
-            </div>
-            <button id="whatsapp-btn" class="btn-whatsapp" onclick="openCheckoutModal()">
-                Confirm Your Order in WhatsApp
-            </button>
-        </div>
-    </aside>
-
-    <!-- Load scripts in order: Data first, then Logic -->
-    <!-- Using ./ ensures explicit relative pathing -->
     <script src="./products.js"></script>
     <script src="./script.js"></script>
-    
-    <!-- This module script is required for dev environments but optional for prod -->
-    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
