@@ -279,32 +279,33 @@ a {
     height: 70px;
 }
 
-/* Category Chips (Mobile & Desktop) */
+/* Category Chips (Updated: Now in-flow, not sticky) */
 .category-chips-container {
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-body);
+    padding: 0 0 1.5rem 0; /* Space below */
+    border-bottom: none;
+    background: transparent;
     margin-bottom: 2rem;
-    position: sticky;
-    top: 70px; /* Below sticky header */
-    z-index: 900;
-    display: none; /* JS will toggle for mobile or we show always? let's show on Shop View */
+    position: static;
+    z-index: auto;
+    display: none; /* Mobile only toggle via media query */
+    width: 100%;
 }
 
 .chip-scroll {
     display: flex;
     gap: 12px;
     overflow-x: auto;
-    padding: 0 var(--spacing-container);
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+    /* Adjust padding for edge-to-edge feel inside container */
+    padding: 5px 2px;
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
 }
 .chip-scroll::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
 }
 
 .category-chip {
-    padding: 8px 16px;
+    padding: 8px 18px;
     border: 1px solid var(--border);
     border-radius: 20px;
     font-size: 0.85rem;
@@ -878,6 +879,8 @@ a {
     font-weight: 400;
     margin-bottom: 0.5rem;
     letter-spacing: -0.02em;
+    opacity: 0.9;
+    color: #ffffff;
 }
 
 .about-hero .subtitle {
@@ -1124,6 +1127,9 @@ a {
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s ease;
     overflow: hidden;
     box-sizing: border-box;
+    display: flex; /* NEW: Flexbox for equal height content alignment */
+    flex-direction: column; /* NEW */
+    height: 100%; /* NEW: Fill grid cell height */
 }
 
 .product-card:hover {
@@ -1261,6 +1267,16 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    flex-grow: 1; /* NEW: Push footer to bottom */
+    flex-direction: column; /* NEW: Align items vertically */
+}
+
+/* Ensure price sits at the bottom */
+.product-meta > div:last-child {
+    margin-top: auto; 
+    width: 100%;
+    text-align: right;
+    padding-top: 8px;
 }
 
 .product-name {
@@ -2107,6 +2123,12 @@ a {
         /* Hide regular toolbar or simplify it? */
         /* Let's keep it but maybe simpler */
     }
+
+    /* Fixed header no longer needs extra padding since chips are in flow */
+    .hero, .about-hero {
+        padding-top: 0; 
+        align-items: center; /* Ensure content stays centered */
+    }
 }
 
 @media (max-width: 1024px) {
@@ -2377,6 +2399,10 @@ a {
         box-shadow: none;
         border-radius: 0;
         overflow: visible;
+        /* Ensure Flexbox inheritance for mobile if previously overridden */
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
     
     .product-card:hover {
@@ -2413,7 +2439,7 @@ a {
     
     .product-meta > div:last-child {
         text-align: left;
-        margin-top: 4px;
+        margin-top: auto; /* Push to bottom */
     }
     
     .product-price {

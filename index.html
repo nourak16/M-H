@@ -110,19 +110,6 @@
                 </div>
             </nav>
         </div>
-        
-        <!-- Category Chips Container (Mobile Focus) -->
-        <div class="category-chips-container" id="category-chips">
-            <div class="chip-scroll">
-                <button class="category-chip active" onclick="filterProducts('All')">All</button>
-                <button class="category-chip" onclick="filterProducts('Sale')">Sale</button>
-                <button class="category-chip" onclick="filterProducts('Tops')">Tops</button>
-                <button class="category-chip" onclick="filterProducts('Bottoms')">Bottoms</button>
-                <button class="category-chip" onclick="filterProducts('Dresses')">Dresses</button>
-                <button class="category-chip" onclick="filterProducts('Outerwear')">Outerwear</button>
-                <button class="category-chip" onclick="filterProducts('Accessories')">Accessories</button>
-            </div>
-        </div>
 
         <!-- Search Overlay (Hidden by default) -->
         <div id="search-overlay" class="search-overlay">
@@ -165,6 +152,19 @@
                         <option value="price-desc">Price: High to Low</option>
                     </select>
                     <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+
+            <!-- Category Chips Container (Now in Flow) -->
+            <div class="category-chips-container" id="category-chips">
+                <div class="chip-scroll">
+                    <button class="category-chip active" onclick="filterProducts('All')">All</button>
+                    <button class="category-chip" onclick="filterProducts('Sale')">Sale</button>
+                    <button class="category-chip" onclick="filterProducts('Tops')">Tops</button>
+                    <button class="category-chip" onclick="filterProducts('Bottoms')">Bottoms</button>
+                    <button class="category-chip" onclick="filterProducts('Dresses')">Dresses</button>
+                    <button class="category-chip" onclick="filterProducts('Outerwear')">Outerwear</button>
+                    <button class="category-chip" onclick="filterProducts('Accessories')">Accessories</button>
                 </div>
             </div>
 

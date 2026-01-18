@@ -790,7 +790,11 @@ function openModal(id, skipPushState = false) {
 
     // Update URL Hash if needed
     if (!skipPushState) {
-        history.pushState(null, null, `#product-${id}`);
+        try {
+            history.pushState(null, null, `#product-${id}`);
+        } catch(e) {
+            console.warn("History API restricted");
+        }
     }
 }
 
@@ -838,7 +842,11 @@ function closeModal(e, updateHistory = true) {
     
     if (updateHistory) {
         // Clear hash without reloading
-        history.pushState("", document.title, window.location.pathname + window.location.search);
+        try {
+            history.pushState("", document.title, window.location.pathname + window.location.search);
+        } catch(e) {
+            console.warn("History API restricted");
+        }
     }
 }
 
