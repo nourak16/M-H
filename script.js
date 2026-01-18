@@ -14,6 +14,13 @@ const ROUTES = {
     ABOUT: 'about'
 };
 
+const ICONS = {
+    cartOutline: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`,
+    cartFilled: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 2L3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6L18 2H6Z" fill="currentColor"/><path d="M16 10A4 4 0 0 1 8 10" stroke="var(--bg-body)" stroke-width="2" stroke-linecap="round"/></svg>`,
+    heartOutline: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`,
+    heartFilled: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="currentColor"></path></svg>`
+};
+
 /* --- State Variables --- */
 let cart = [];
 let favorites = [];
@@ -70,6 +77,8 @@ function initApp() {
         grid: document.getElementById('product-grid'),
         items: document.getElementById('cart-items'),
         headerCount: document.getElementById('header-count'),
+        cartIconBtn: document.getElementById('cart-icon-btn'),
+        favIconBtn: document.getElementById('fav-icon-btn'),
         cartTotal: document.getElementById('cart-total'),
         whatsappBtn: document.getElementById('whatsapp-btn'),
         header: document.getElementById('header'),
@@ -101,7 +110,10 @@ function initApp() {
         navAbout: document.getElementById('nav-about'),
         favoritesModal: document.getElementById('favorites-modal'),
         favoritesGrid: document.getElementById('favorites-grid'),
-        favoritesCountBubble: document.getElementById('favorites-count-bubble')
+        favoritesCountBubble: document.getElementById('favorites-count-bubble'),
+        mcContent: document.getElementById('mc-content'),
+        chipBtns: document.querySelectorAll('.category-chip'),
+        recGrid: document.getElementById('rec-grid')
     };
 
     // Theme Init
@@ -113,21 +125,19 @@ function initApp() {
         }
     } catch(e) {}
     
-    // Announcement Bar Init
-    initAnnouncement();
-    
-    // Initialize Router immediately
+    // Initialize Router
     initRouter();
 
-    // Show loading state first for grid
-    if (els.grid) {
-        els.grid.innerHTML = `
-            <div class="loader-container">
-                <div class="spinner"></div>
-                <span>Curating collection...</span>
-            </div>
-        `;
-    }
+    // Check for Deep Link (Hash)
+    setTimeout(() => {
+        handleHashChange();
+    }, 600);
+    
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+
+    // Initial Render Skeleton
+    if (els.grid) renderSkeleton();
     
     // Simulate data fetching and render
     setTimeout(() => {
@@ -137,12 +147,37 @@ function initApp() {
         previousQty = cart.reduce((sum, i) => sum + i.quantity, 0);
 
         document.querySelectorAll('.reveal-on-scroll').forEach(el => scrollObserver.observe(el));
-    }, 500);
+    }, 600);
     
     window.addEventListener('scroll', () => {
         const isSticky = window.scrollY > 50;
         if(els.header) els.header.classList.toggle('sticky', isSticky);
     });
+}
+
+function renderSkeleton() {
+    if(!els.grid) return;
+    const skeletonHTML = `
+        <div class="skeleton-card">
+            <div class="skeleton sk-img"></div>
+            <div class="skeleton sk-text"></div>
+            <div class="skeleton sk-text-sm"></div>
+        </div>
+    `.repeat(6);
+    els.grid.innerHTML = `<div class="skeleton-grid">${skeletonHTML}</div>`;
+}
+
+/* --- Deep Linking --- */
+function handleHashChange() {
+    const hash = window.location.hash;
+    if (hash.startsWith('#product-')) {
+        const id = parseInt(hash.replace('#product-', ''));
+        if (!isNaN(id)) {
+            openModal(id, true); // true = allow hash update (already set), just open logic
+        }
+    } else if (hash === '') {
+        closeModal(null, false);
+    }
 }
 
 /* --- Navigation & Router Functions --- */
@@ -174,8 +209,6 @@ function initRouter() {
 }
 
 function handleInitialRoute() {
-    // In strict sandboxes, pathname might be complex, so we default to Home
-    // unless logic specifically detects /about
     const path = window.location.pathname;
     if (path.endsWith('/about')) {
         renderView(ROUTES.ABOUT, false, true);
@@ -184,7 +217,7 @@ function handleInitialRoute() {
     }
 }
 
-function renderView(view, pushState = true, isInitial = false) {
+function renderView(view, pushState = true, isInitial = false, skipScroll = false) {
     if (pushState) {
         try {
             if (view === ROUTES.HOME) {
@@ -193,8 +226,6 @@ function renderView(view, pushState = true, isInitial = false) {
                 history.pushState({ view: ROUTES.ABOUT }, '', '/about');
             }
         } catch (e) {
-            // SecurityError ignored: environment does not support history API manipulation
-            // View state will still update correctly below.
             console.log("Navigation updated (History API restricted)");
         }
     }
@@ -204,7 +235,7 @@ function renderView(view, pushState = true, isInitial = false) {
         if(els.aboutView) els.aboutView.style.display = 'none';
         if(els.navHome) els.navHome.classList.add('active');
         if(els.navAbout) els.navAbout.classList.remove('active');
-        if (!isInitial) window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (!isInitial && !skipScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (view === ROUTES.ABOUT) {
         if(els.homeView) els.homeView.style.display = 'none';
         if(els.aboutView) els.aboutView.style.display = 'block';
@@ -222,26 +253,11 @@ function renderView(view, pushState = true, isInitial = false) {
 }
 
 // Exposed Global Wrappers
-window.showHome = function() { renderView(ROUTES.HOME, true); }
+window.showHome = function(skipScroll = false) { renderView(ROUTES.HOME, true, false, skipScroll); }
 window.showAbout = function() { renderView(ROUTES.ABOUT, true); }
 window.goHome = function() {
     filterProducts('All');
     showHome();
-}
-
-/* --- Announcement Bar --- */
-function initAnnouncement() {
-    try {
-        const isClosed = localStorage.getItem('mt_announcement_closed') === 'true';
-        if (isClosed) {
-            document.body.classList.add('announcement-hidden');
-        }
-    } catch(e) {}
-}
-
-function closeAnnouncement() {
-    document.body.classList.add('announcement-hidden');
-    try { localStorage.setItem('mt_announcement_closed', 'true'); } catch(e) {}
 }
 
 /* --- Toast --- */
@@ -280,9 +296,9 @@ function scrollToFooter() {
     if (footer) footer.scrollIntoView({ behavior: 'smooth' });
 }
 
-function scrollToGrid() {
+window.scrollToGrid = function() {
     if(els.homeView && els.homeView.style.display === 'none') {
-        showHome();
+        showHome(true); 
         setTimeout(() => {
             const section = document.getElementById('shop-section');
             if(section) section.scrollIntoView({ behavior: 'smooth' });
@@ -326,9 +342,15 @@ function filterProducts(category) {
     
     if(els.collectionTitle) els.collectionTitle.innerText = category === 'All' ? 'New Arrivals' : category;
     
-    if (els.grid) {
-        els.grid.innerHTML = `<div class="loader-container"><div class="spinner"></div></div>`;
+    // Update active chip state
+    if (els.chipBtns) {
+        els.chipBtns.forEach(btn => {
+            if(btn.textContent.trim() === category) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
     }
+
+    if (els.grid) renderSkeleton();
     setTimeout(renderGrid, 400);
 }
 
@@ -343,7 +365,7 @@ function renderGrid() {
     const productsData = window.PRODUCTS;
     
     if (typeof productsData === 'undefined') {
-        els.grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--secondary); padding: 4rem;">Loading data...</p>`;
+        renderSkeleton();
         setTimeout(renderGrid, 500);
         return;
     }
@@ -361,7 +383,6 @@ function renderGrid() {
         if(els.collectionTitle) els.collectionTitle.innerText = activeCategory === 'All' ? 'New Arrivals' : activeCategory;
         
         if (activeCategory === 'Sale') {
-            // Filter by existence of originalPrice
             filtered = filtered.filter(p => p.originalPrice);
         } else if (activeCategory !== 'All') {
             filtered = filtered.filter(p => p.category === activeCategory);
@@ -403,15 +424,16 @@ function renderGrid() {
             badgeDisplay = `<span class="sale-badge">-${discount}%</span>`;
         }
 
+        // Lazy load images
         return `
         <div class="product-card reveal-on-scroll" onclick="openModal(${p.id})" style="transition-delay: ${index * 0.1}s">
             <div class="product-image-wrapper">
                 ${badgeDisplay}
-                <img src="${p.image}" alt="${p.name}" class="product-img">
+                <img src="${p.image}" alt="${p.name}" class="product-img" id="img-${p.id}" loading="lazy">
                 <button class="btn-fav ${isFav ? 'active' : ''}" data-id="${p.id}" onclick="event.stopPropagation(); toggleFavorite(${p.id}, this)">
                     <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                 </button>
-                <button class="quick-add-btn" onclick="event.stopPropagation(); addToCart(${p.id}, 'M', 1)">
+                <button class="quick-add-btn" onclick="event.stopPropagation(); addToCart(${p.id}, 'M', 1, event)">
                     Quick Add (M) - $${p.price}
                 </button>
             </div>
@@ -472,7 +494,46 @@ function toggleCart(forceOpen = false) {
     else body.classList.toggle('cart-open');
 }
 
-function addToCart(id, size, qty) {
+/* --- Fly To Cart Animation --- */
+function animateAddToCart(sourceElement) {
+    if (!sourceElement) return;
+
+    // Clone the source element
+    const clone = sourceElement.cloneNode(true);
+    const rect = sourceElement.getBoundingClientRect();
+    
+    // Style clone to match starting position
+    clone.classList.add('fly-item');
+    clone.style.left = rect.left + 'px';
+    clone.style.top = rect.top + 'px';
+    clone.style.width = rect.width + 'px';
+    clone.style.height = rect.height + 'px';
+    
+    document.body.appendChild(clone);
+
+    // Target: Cart Icon
+    const target = els.cartIconBtn;
+    if (target) {
+        const targetRect = target.getBoundingClientRect();
+        
+        // Trigger reflow
+        void clone.offsetWidth;
+        
+        // Animate
+        clone.style.left = (targetRect.left + 10) + 'px';
+        clone.style.top = (targetRect.top + 10) + 'px';
+        clone.style.width = '20px';
+        clone.style.height = '20px';
+        clone.style.opacity = '0';
+    }
+
+    // Cleanup
+    setTimeout(() => {
+        if(clone.parentNode) clone.parentNode.removeChild(clone);
+    }, 800);
+}
+
+function addToCart(id, size, qty, event) {
     if (!window.PRODUCTS) return;
     const product = window.PRODUCTS.find(p => p.id === id);
     const existing = cart.find(i => i.id === id && i.size === size);
@@ -485,6 +546,29 @@ function addToCart(id, size, qty) {
     
     saveAndUpdate();
     showToast(`Added ${product.name} (${size}) to cart`);
+
+    // Animation trigger
+    // Try to find image based on event or ID
+    let imgSource = null;
+    
+    if (event && event.target) {
+        // If event came from Quick Add button, look for sibling image-wrapper > img
+        const wrapper = event.target.closest('.product-image-wrapper');
+        if (wrapper) {
+            imgSource = wrapper.querySelector('img');
+        }
+    } 
+    
+    // Fallback if added from modal or event structure differs
+    if (!imgSource) {
+        imgSource = document.getElementById(`img-${id}`);
+    }
+    // Fallback if modal image is source (when added from modal)
+    if (!imgSource && els.modalImg && els.modal.classList.contains('open')) {
+        imgSource = els.modalImg;
+    }
+
+    if (imgSource) animateAddToCart(imgSource);
 }
 
 function updateQty(index, change) {
@@ -513,6 +597,7 @@ function updateUI() {
     const totalVal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
     const fmtTotal = '$' + totalVal.toFixed(2);
 
+    // Animation trigger on counter
     if (totalQty > previousQty) {
         if(els.headerCount) {
             els.headerCount.classList.remove('cart-animating');
@@ -522,16 +607,71 @@ function updateUI() {
     }
     previousQty = totalQty;
 
-    if(els.headerCount) els.headerCount.textContent = totalQty;
+    // Update Cart Counter Badge
+    if(els.headerCount) {
+        els.headerCount.textContent = totalQty;
+        if (totalQty > 0) els.headerCount.classList.add('active');
+        else els.headerCount.classList.remove('active');
+    }
+
+    // Dynamic Icon States: Cart
+    if (els.cartIconBtn) {
+        const svg = els.cartIconBtn.querySelector('svg');
+        if (svg) {
+            const newIcon = totalQty > 0 ? ICONS.cartFilled : ICONS.cartOutline;
+            // Create a temp element to parse string
+            const temp = document.createElement('div');
+            temp.innerHTML = newIcon;
+            if (temp.firstChild) svg.replaceWith(temp.firstChild);
+        }
+    }
+
+    // Dynamic Icon States: Favorites
+    if (els.favIconBtn) {
+        const svg = els.favIconBtn.querySelector('svg');
+        if (svg) {
+            const newIcon = favorites.length > 0 ? ICONS.heartFilled : ICONS.heartOutline;
+            const temp = document.createElement('div');
+            temp.innerHTML = newIcon;
+            if (temp.firstChild) svg.replaceWith(temp.firstChild);
+        }
+    }
+
     if(els.cartTotal) els.cartTotal.textContent = fmtTotal;
     
     if(els.whatsappBtn) els.whatsappBtn.disabled = cart.length === 0;
 
+    // Update Favorites Badge (Red Dot)
     if(els.favoritesCountBubble) {
         const favCount = favorites.length;
-        els.favoritesCountBubble.textContent = favCount;
+        // Dot style: remove text content, just toggle active
+        els.favoritesCountBubble.textContent = ''; 
         if(favCount > 0) els.favoritesCountBubble.classList.add('active');
         else els.favoritesCountBubble.classList.remove('active');
+    }
+
+    // Update Mini Cart Preview
+    if (els.mcContent) {
+        if (cart.length === 0) {
+            els.mcContent.innerHTML = `<p style="color: var(--secondary); font-size: 0.9rem;">Your bag is empty.</p>`;
+        } else {
+            // Show last added item (last in array)
+            const lastItem = cart[cart.length - 1];
+            els.mcContent.innerHTML = `
+                <div class="mc-item">
+                    <img src="${lastItem.image}" alt="">
+                    <div class="mc-info">
+                        <h6>${lastItem.name}</h6>
+                        <span>${lastItem.quantity} x $${lastItem.price}</span>
+                    </div>
+                </div>
+                <div class="mc-total">
+                    <span>Subtotal:</span>
+                    <span>${fmtTotal}</span>
+                </div>
+                <button class="btn-mc-checkout" onclick="toggleCart(true)">Checkout</button>
+            `;
+        }
     }
 }
 
@@ -605,7 +745,7 @@ function renderFavoritesList() {
             <h5>${p.name}</h5>
             <span class="price">$${p.price}</span>
             <div class="fav-actions">
-                <button class="btn-fav-add" onclick="addToCart(${p.id}, 'M', 1)">Add to Cart</button>
+                <button class="btn-fav-add" onclick="addToCart(${p.id}, 'M', 1, event)">Add to Cart</button>
                 <button class="btn-fav-remove" onclick="toggleFavorite(${p.id})">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
@@ -615,7 +755,7 @@ function renderFavoritesList() {
 }
 
 /* --- Product Modal --- */
-function openModal(id) {
+function openModal(id, skipPushState = false) {
     if (!window.PRODUCTS) return;
     const product = window.PRODUCTS.find(p => p.id === id);
     if (!product) return;
@@ -640,10 +780,44 @@ function openModal(id) {
     renderModalSizes();
     if(els.modalQtyVal) els.modalQtyVal.textContent = modalState.qty;
 
+    // Render recommendations
+    renderRecommendations(product);
+
     if(els.modal) {
         els.modal.classList.add('open');
         document.body.style.overflow = 'hidden'; 
     }
+
+    // Update URL Hash if needed
+    if (!skipPushState) {
+        history.pushState(null, null, `#product-${id}`);
+    }
+}
+
+function renderRecommendations(currentProduct) {
+    if(!els.recGrid) return;
+    const allProducts = window.PRODUCTS || [];
+    
+    // Filter similar category, excluding current
+    let similar = allProducts.filter(p => p.category === currentProduct.category && p.id !== currentProduct.id);
+    
+    // If not enough similar, grab random others
+    if (similar.length < 2) {
+        const others = allProducts.filter(p => p.id !== currentProduct.id && !similar.includes(p));
+        similar = similar.concat(others);
+    }
+    
+    // Shuffle and pick 2
+    similar.sort(() => 0.5 - Math.random());
+    const picks = similar.slice(0, 2);
+    
+    els.recGrid.innerHTML = picks.map(p => `
+        <div class="rec-card" onclick="openModal(${p.id})">
+            <img src="${p.image}" class="rec-img" loading="lazy">
+            <span class="rec-name">${p.name}</span>
+            <span class="rec-price">$${p.price}</span>
+        </div>
+    `).join('');
 }
 
 function renderModalSizes() {
@@ -657,10 +831,15 @@ function renderModalSizes() {
     }
 }
 
-function closeModal(e) {
+function closeModal(e, updateHistory = true) {
     if (e && e.target !== els.modal && !e.target.classList.contains('modal-close')) return;
     if(els.modal) els.modal.classList.remove('open');
     document.body.style.overflow = '';
+    
+    if (updateHistory) {
+        // Clear hash without reloading
+        history.pushState("", document.title, window.location.pathname + window.location.search);
+    }
 }
 
 function selectSize(btn, size) {
@@ -679,25 +858,17 @@ function updateModalQty(change) {
 function addToCartFromModal() {
     if (modalState.id) {
         addToCart(modalState.id, modalState.size, modalState.qty);
+        // We do NOT close modal immediately as per usual e-commerce UX (keep user there unless they want to leave)
+        // Or we can close it. Let's keep it open but show toast.
+        // Actually for mobile bottom sheet it's better to stay or close?
+        // Let's close it to encourage checking out? No, let's keep it.
+        // The Sticky bar makes it easy to add multiple.
         closeModal({ target: els.modal });
     }
 }
 
-function buyNowFromModal() {
-    if (!modalState.id) return;
-    if (!window.PRODUCTS) return;
-    const product = window.PRODUCTS.find(p => p.id === modalState.id);
-    if (!product) return;
-
-    let msg = "INSTANT ORDER REQUEST - M&H\n-----------------------------\n";
-    msg += `1x ${product.name}\n`;
-    msg += `Size: ${modalState.size}\n`;
-    msg += `Quantity: ${modalState.qty}\n`;
-    msg += `Price: $${(product.price * modalState.qty).toFixed(2)}\n`;
-    msg += `-----------------------------\n`;
-    msg += `Please confirm availability for immediate purchase.`;
-    
-    window.open(`https://wa.me/${OWNER_PHONE}?text=${encodeURIComponent(msg)}`, '_blank');
+window.showSizeGuide = function() {
+    alert("Size Guide:\n\nS: Chest 34-36\" / Waist 28-30\"\nM: Chest 38-40\" / Waist 32-34\"\nL: Chest 42-44\" / Waist 36-38\"\nXL: Chest 46-48\" / Waist 40-42\"");
 }
 
 /* --- Checkout Modal --- */
@@ -850,8 +1021,6 @@ window.toggleMobileMenu = toggleMobileMenu;
 window.closeMobileMenu = closeMobileMenu;
 window.toggleMobileDropdown = toggleMobileDropdown;
 window.initRouter = initRouter;
-window.initAnnouncement = initAnnouncement;
-window.closeAnnouncement = closeAnnouncement;
 window.showToast = showToast;
 window.toggleTheme = toggleTheme;
 window.scrollToFooter = scrollToFooter;
@@ -872,7 +1041,6 @@ window.closeModal = closeModal;
 window.selectSize = selectSize;
 window.updateModalQty = updateModalQty;
 window.addToCartFromModal = addToCartFromModal;
-window.buyNowFromModal = buyNowFromModal;
 window.openCheckoutModal = openCheckoutModal;
 window.closeCheckoutModal = closeCheckoutModal;
 window.updateCheckoutTotal = updateCheckoutTotal;

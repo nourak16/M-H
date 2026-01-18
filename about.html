@@ -12,12 +12,6 @@
 </head>
 <body id="body">
 
-    <!-- Announcement Bar -->
-    <div id="announcement-bar" class="announcement-bar">
-        <p>Complimentary Delivery in Beirut on orders over $50</p>
-        <button class="announcement-close" onclick="closeAnnouncement()" aria-label="Close announcement">&times;</button>
-    </div>
-
     <!-- Toast Notification -->
     <div id="toast" class="toast">
         <div class="toast-content">
@@ -33,42 +27,59 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
 
-            <a class="logo" href="index.html">M&H</a>
+            <a class="logo" href="index.html#shop-section">M&H</a>
             
             <nav class="nav-wrapper" id="nav-wrapper">
                 <ul class="nav-menu">
-                    <li><a class="nav-link" href="index.html">Home</a></li>
+                    <li><a class="nav-link" href="index.html#shop-section">Home</a></li>
                     
                     <li class="has-dropdown" id="products-dropdown-li">
                         <a class="nav-link" href="index.html">Products</a>
                     </li>
                     
                     <li><a class="nav-link active" href="about.html">About Us</a></li>
+
+                    <!-- Mobile Only Favorites Link -->
+                    <li class="mobile-only"><a class="nav-link" onclick="openFavoritesModal()">Saved Items</a></li>
                 </ul>
             </nav>
 
             <nav class="nav-actions">
-                <!-- Favorites Trigger -->
-                <button class="favorites-trigger" onclick="openFavoritesModal()" aria-label="Open Favorites">
+                <!-- Favorites Trigger (Hidden on Mobile) -->
+                <button class="favorites-trigger" id="fav-icon-btn" onclick="openFavoritesModal()" aria-label="Open Favorites">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                     </svg>
-                    <span id="favorites-count-bubble" class="favorites-count-bubble">0</span>
+                    <span id="favorites-count-bubble" class="favorites-count-bubble"></span>
                 </button>
 
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                 </button>
-                <button class="cart-trigger" onclick="toggleCart()">
-                    <span>Cart</span>
-                    <span class="cart-count-bubble" id="header-count">0</span>
-                </button>
+                
+                <div class="cart-wrapper">
+                    <button class="cart-trigger" id="cart-icon-btn" onclick="toggleCart()" aria-label="Open cart">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <span class="cart-count-bubble" id="header-count">0</span>
+                    </button>
+                    <!-- Mini Cart Dropdown -->
+                    <div class="mini-cart-dropdown" id="mini-cart-dropdown">
+                        <div class="mc-header">Just Added</div>
+                        <div id="mc-content">
+                            <!-- JS Injection -->
+                            <p style="color: var(--secondary); font-size: 0.9rem;">Your bag is empty.</p>
+                        </div>
+                    </div>
+                </div>
             </nav>
         </div>
     </header>
 
     <!-- About Main Content -->
-    <!-- Removed main 'container' wrapper to allow full-width sections -->
     <main>
         <section class="about-hero reveal-on-scroll">
             <span class="subtitle">Our Story</span>

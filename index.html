@@ -16,12 +16,6 @@
 </head>
 <body id="body">
 
-    <!-- Announcement Bar -->
-    <div id="announcement-bar" class="announcement-bar">
-        <p>Complimentary Delivery in Beirut on orders over $50</p>
-        <button class="announcement-close" onclick="closeAnnouncement()" aria-label="Close announcement">&times;</button>
-    </div>
-
     <!-- Toast Notification -->
     <div id="toast" class="toast">
         <div class="toast-content">
@@ -42,12 +36,12 @@
                 </svg>
             </button>
 
-            <a class="logo" href="/" onclick="event.preventDefault(); showHome()">M&H</a>
+            <a class="logo" href="/" onclick="event.preventDefault(); scrollToGrid()">M&H</a>
             
             <!-- Main Navigation (Desktop & Mobile Dropdown) -->
             <nav class="nav-wrapper" id="nav-wrapper">
                 <ul class="nav-menu">
-                    <li><a class="nav-link active" id="nav-home" href="/" onclick="event.preventDefault(); showHome()">Home</a></li>
+                    <li><a class="nav-link active" id="nav-home" href="/" onclick="event.preventDefault(); scrollToGrid()">Home</a></li>
                     
                     <li class="has-dropdown" id="products-dropdown-li">
                         <a class="nav-link" onclick="toggleMobileDropdown(event)">Products</a>
@@ -63,6 +57,9 @@
                     </li>
                     
                     <li><a class="nav-link" id="nav-about" href="/about" onclick="event.preventDefault(); showAbout()">About Us</a></li>
+
+                    <!-- Mobile Only Favorites Link -->
+                    <li class="mobile-only"><a class="nav-link" onclick="openFavoritesModal()">Saved Items</a></li>
                 </ul>
             </nav>
 
@@ -75,12 +72,13 @@
                     </svg>
                 </button>
 
-                <!-- Favorites Trigger -->
-                <button class="favorites-trigger" onclick="openFavoritesModal()" aria-label="Open Favorites">
+                <!-- Favorites Trigger (Hidden on Mobile) -->
+                <button class="favorites-trigger" id="fav-icon-btn" onclick="openFavoritesModal()" aria-label="Open Favorites">
+                    <!-- Icon injected via JS for state -->
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                     </svg>
-                    <span id="favorites-count-bubble" class="favorites-count-bubble">0</span>
+                    <span id="favorites-count-bubble" class="favorites-count-bubble"></span>
                 </button>
 
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
@@ -88,11 +86,42 @@
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
                 </button>
-                <button class="cart-trigger" onclick="toggleCart()">
-                    <span>Cart</span>
-                    <span class="cart-count-bubble" id="header-count">0</span>
-                </button>
+                
+                <!-- Cart Wrapper for Mini Cart Preview -->
+                <div class="cart-wrapper">
+                    <button class="cart-trigger" id="cart-icon-btn" onclick="toggleCart()" aria-label="Open cart">
+                        <!-- Icon injected via JS for state -->
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        <span class="cart-count-bubble" id="header-count">0</span>
+                    </button>
+                    
+                    <!-- Mini Cart Dropdown -->
+                    <div class="mini-cart-dropdown" id="mini-cart-dropdown">
+                        <div class="mc-header">Just Added</div>
+                        <div id="mc-content">
+                            <!-- JS Injection -->
+                            <p style="color: var(--secondary); font-size: 0.9rem;">Your bag is empty.</p>
+                        </div>
+                    </div>
+                </div>
             </nav>
+        </div>
+        
+        <!-- Category Chips Container (Mobile Focus) -->
+        <div class="category-chips-container" id="category-chips">
+            <div class="chip-scroll">
+                <button class="category-chip active" onclick="filterProducts('All')">All</button>
+                <button class="category-chip" onclick="filterProducts('Sale')">Sale</button>
+                <button class="category-chip" onclick="filterProducts('Tops')">Tops</button>
+                <button class="category-chip" onclick="filterProducts('Bottoms')">Bottoms</button>
+                <button class="category-chip" onclick="filterProducts('Dresses')">Dresses</button>
+                <button class="category-chip" onclick="filterProducts('Outerwear')">Outerwear</button>
+                <button class="category-chip" onclick="filterProducts('Accessories')">Accessories</button>
+            </div>
         </div>
 
         <!-- Search Overlay (Hidden by default) -->
@@ -254,7 +283,7 @@
                 <p id="modal-desc" class="modal-desc"></p>
                 
                 <div class="size-selector">
-                    <span class="size-label">Select Size</span>
+                    <span class="size-label">Select Size <a onclick="showSizeGuide()" class="size-guide-link">Size Guide</a></span>
                     <div id="modal-sizes" class="size-options">
                         <!-- JS Injection -->
                     </div>
@@ -274,9 +303,13 @@
                     <button class="btn-modal-add" onclick="addToCartFromModal()">
                         Add to Cart
                     </button>
-                    <button class="btn-modal-buy" onclick="buyNowFromModal()">
-                        Buy Now
-                    </button>
+                </div>
+
+                <div class="recommendations-section">
+                    <h4 class="recommendations-title">You might also like</h4>
+                    <div id="rec-grid" class="recommendations-grid">
+                        <!-- JS Injection -->
+                    </div>
                 </div>
             </div>
         </div>
