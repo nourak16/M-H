@@ -44,12 +44,12 @@ try {
     cart = JSON.parse(localStorage.getItem('mt_cart')) || [];
     favorites = JSON.parse(localStorage.getItem('mt_favorites')) || [];
 } catch(e) {
-    console.warn("Storage not available");
+    // Storage not available
 }
 
 /* --- Initialization Guard --- */
 if (window.APP_INITIALIZED) {
-    console.warn("App already initialized");
+    // App already initialized
 } else {
     window.APP_INITIALIZED = true;
     if (document.readyState === 'loading') {
@@ -226,7 +226,7 @@ function renderView(view, pushState = true, isInitial = false, skipScroll = fals
                 history.pushState({ view: ROUTES.ABOUT }, '', '/about');
             }
         } catch (e) {
-            console.log("Navigation updated (History API restricted)");
+            // History API restricted - ignoring
         }
     }
 
@@ -793,7 +793,7 @@ function openModal(id, skipPushState = false) {
         try {
             history.pushState(null, null, `#product-${id}`);
         } catch(e) {
-            console.warn("History API restricted");
+            // History API restricted - ignoring
         }
     }
 }
@@ -845,7 +845,7 @@ function closeModal(e, updateHistory = true) {
         try {
             history.pushState("", document.title, window.location.pathname + window.location.search);
         } catch(e) {
-            console.warn("History API restricted");
+            // History API restricted - ignoring
         }
     }
 }
