@@ -12,7 +12,6 @@
     
     <!-- Using ./ ensures explicit relative pathing for subdirectories -->
     <link rel="stylesheet" href="./style.css">
-<link rel="stylesheet" href="/index.css">
 </head>
 <body id="body">
 
@@ -36,12 +35,14 @@
                 </svg>
             </button>
 
-            <a class="logo" href="/" onclick="event.preventDefault(); scrollToGrid()">M&H</a>
+            <!-- Updated: Use JS only, no hash in href -->
+            <a class="logo" href="javascript:void(0)" onclick="goHome()">M&H</a>
             
             <!-- Main Navigation (Desktop & Mobile Dropdown) -->
             <nav class="nav-wrapper" id="nav-wrapper">
                 <ul class="nav-menu">
-                    <li><a class="nav-link active" id="nav-home" href="/" onclick="event.preventDefault(); scrollToGrid()">Home</a></li>
+                    <!-- Updated: Use JS only, no hash in href -->
+                    <li><a class="nav-link active" id="nav-home" href="javascript:void(0)" onclick="showHome()">Home</a></li>
                     
                     <li class="has-dropdown" id="products-dropdown-li">
                         <a class="nav-link" onclick="toggleMobileDropdown(event)">Products</a>
@@ -56,10 +57,11 @@
                         </ul>
                     </li>
                     
-                    <li><a class="nav-link" id="nav-about" href="/about" onclick="event.preventDefault(); showAbout()">About Us</a></li>
+                    <!-- Updated: Use JS only, no hash in href -->
+                    <li><a class="nav-link" id="nav-about" href="javascript:void(0)" onclick="showAbout()">About Us</a></li>
 
                     <!-- Mobile Only Favorites Link -->
-                    <li class="mobile-only"><a class="nav-link" onclick="openFavoritesModal()">Saved Items</a></li>
+                    <li class="mobile-only"><a class="nav-link" href="javascript:void(0)" onclick="openFavoritesModal()">Saved Items</a></li>
                 </ul>
             </nav>
 
@@ -240,9 +242,9 @@
                         <h4>Community</h4>
                         <p>Join our journey and see behind the scenes.</p>
                         <ul>
-                            <li><a href="#" target="_blank">Instagram</a></li>
-                            <li><a href="#" target="_blank">TikTok</a></li>
-                            <li><a href="#" target="_blank">Pinterest</a></li>
+                            <li><a href="javascript:void(0)">Instagram</a></li>
+                            <li><a href="javascript:void(0)">TikTok</a></li>
+                            <li><a href="javascript:void(0)">Pinterest</a></li>
                         </ul>
                     </div>
                     <div class="contact-card">
