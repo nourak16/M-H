@@ -9,6 +9,7 @@ const DELIVERY_FEES = {
     "Bekaa": 8.00
 };
 
+// Routing Constants used for Hash values
 const ROUTES = {
     HOME: 'home',
     ABOUT: 'about'
@@ -125,16 +126,8 @@ function initApp() {
         }
     } catch(e) {}
     
-    // Initialize Router
+    // Initialize Hash Router
     initRouter();
-
-    // Check for Deep Link (Hash)
-    setTimeout(() => {
-        handleHashChange();
-    }, 600);
-    
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
 
     // Initial Render Skeleton
     if (els.grid) renderSkeleton();
@@ -143,10 +136,11 @@ function initApp() {
     setTimeout(() => {
         renderGrid();
         updateUI();
-        
         previousQty = cart.reduce((sum, i) => sum + i.quantity, 0);
-
         document.querySelectorAll('.reveal-on-scroll').forEach(el => scrollObserver.observe(el));
+        
+        // Trigger route check again after data is ready (for deep linking products)
+        handleRoute();
     }, 600);
     
     window.addEventListener('scroll', () => {
@@ -167,20 +161,88 @@ function renderSkeleton() {
     els.grid.innerHTML = `<div class="skeleton-grid">${skeletonHTML}</div>`;
 }
 
-/* --- Deep Linking --- */
-function handleHashChange() {
+/* --- Navigation & Router Functions (Hash Based) --- */
+
+function initRouter() {
+    // Handle back/forward buttons and manual hash changes
+    window.addEventListener('hashchange', handleRoute);
+    // Handle initial load
+    window.addEventListener('load', handleRoute);
+}
+
+function handleRoute() {
     const hash = window.location.hash;
-    if (hash.startsWith('#product-')) {
-        const id = parseInt(hash.replace('#product-', ''));
-        if (!isNaN(id)) {
-            openModal(id, true); // true = allow hash update (already set), just open logic
+    
+    // Default to Home View
+    let view = ROUTES.HOME;
+    let modalId = null;
+
+    if (hash === '#about') {
+        view = ROUTES.ABOUT;
+    } else if (hash.startsWith('#product-')) {
+        // If product, we stay on Home view (grid) but open modal
+        view = ROUTES.HOME;
+        modalId = parseInt(hash.replace('#product-', ''));
+    }
+
+    renderView(view, false); // don't set hash recursively
+
+    if (modalId && !isNaN(modalId)) {
+        // Ensure products are loaded before opening
+        if (window.PRODUCTS) {
+            openModal(modalId, true); // true = skip hash update
         }
-    } else if (hash === '') {
-        closeModal(null, false);
+    } else {
+        // If route is NOT a product, make sure modal is closed
+        if (els.modal && els.modal.classList.contains('open')) {
+            closeModal(null, true); // true = skip hash update
+        }
     }
 }
 
-/* --- Navigation & Router Functions --- */
+function renderView(view, setHash = false) {
+    if (view === ROUTES.HOME) {
+        if(els.homeView) els.homeView.style.display = 'block';
+        if(els.aboutView) els.aboutView.style.display = 'none';
+        if(els.navHome) els.navHome.classList.add('active');
+        if(els.navAbout) els.navAbout.classList.remove('active');
+        if (setHash) window.location.hash = ''; // Clear hash for home
+        
+        // Only scroll to top if we weren't just closing a modal
+        if (!els.modal || !els.modal.classList.contains('open')) {
+             // Optional: retain scroll pos for home? Usually top is safer for Nav clicks.
+        }
+    } else if (view === ROUTES.ABOUT) {
+        if(els.homeView) els.homeView.style.display = 'none';
+        if(els.aboutView) els.aboutView.style.display = 'block';
+        if(els.navHome) els.navHome.classList.remove('active');
+        if(els.navAbout) els.navAbout.classList.add('active');
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (setHash) window.location.hash = 'about';
+    }
+
+    closeMobileMenu();
+    
+    // Refresh animations observer
+    setTimeout(() => {
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => scrollObserver.observe(el));
+    }, 50);
+}
+
+// Global wrappers for onClick compatibility (now update hash mostly)
+window.showHome = function() { 
+    // Show home view AND scroll to grid
+    scrollToGrid();
+}
+window.showAbout = function() { 
+    window.location.hash = 'about';
+}
+window.goHome = function() {
+    filterProducts('All');
+    // Show home view AND scroll to grid
+    scrollToGrid();
+}
 
 function toggleMobileMenu() {
     if(els.navWrapper) els.navWrapper.classList.toggle('active');
@@ -194,70 +256,6 @@ function toggleMobileDropdown(e) {
     if (window.innerWidth <= 1024) {
         if(els.productsDropdownLi) els.productsDropdownLi.classList.toggle('active');
     }
-}
-
-function initRouter() {
-    window.addEventListener('popstate', (event) => {
-        const state = event.state;
-        if (state && state.view) {
-            renderView(state.view, false);
-        } else {
-            handleInitialRoute();
-        }
-    });
-    handleInitialRoute();
-}
-
-function handleInitialRoute() {
-    const path = window.location.pathname;
-    if (path.endsWith('/about')) {
-        renderView(ROUTES.ABOUT, false, true);
-    } else {
-        renderView(ROUTES.HOME, false, true);
-    }
-}
-
-function renderView(view, pushState = true, isInitial = false, skipScroll = false) {
-    if (pushState) {
-        try {
-            if (view === ROUTES.HOME) {
-                history.pushState({ view: ROUTES.HOME }, '', '/');
-            } else if (view === ROUTES.ABOUT) {
-                history.pushState({ view: ROUTES.ABOUT }, '', '/about');
-            }
-        } catch (e) {
-            // History API restricted - ignoring
-        }
-    }
-
-    if (view === ROUTES.HOME) {
-        if(els.homeView) els.homeView.style.display = 'block';
-        if(els.aboutView) els.aboutView.style.display = 'none';
-        if(els.navHome) els.navHome.classList.add('active');
-        if(els.navAbout) els.navAbout.classList.remove('active');
-        if (!isInitial && !skipScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (view === ROUTES.ABOUT) {
-        if(els.homeView) els.homeView.style.display = 'none';
-        if(els.aboutView) els.aboutView.style.display = 'block';
-        if(els.navHome) els.navHome.classList.remove('active');
-        if(els.navAbout) els.navAbout.classList.add('active');
-        if (!isInitial) window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    closeMobileMenu();
-    
-    // Refresh animations
-    setTimeout(() => {
-        document.querySelectorAll('.reveal-on-scroll').forEach(el => scrollObserver.observe(el));
-    }, 50);
-}
-
-// Exposed Global Wrappers
-window.showHome = function(skipScroll = false) { renderView(ROUTES.HOME, true, false, skipScroll); }
-window.showAbout = function() { renderView(ROUTES.ABOUT, true); }
-window.goHome = function() {
-    filterProducts('All');
-    showHome();
 }
 
 /* --- Toast --- */
@@ -297,15 +295,28 @@ function scrollToFooter() {
 }
 
 window.scrollToGrid = function() {
-    if(els.homeView && els.homeView.style.display === 'none') {
-        showHome(true); 
-        setTimeout(() => {
-            const section = document.getElementById('shop-section');
-            if(section) section.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-    } else {
+    // Helper to perform the actual scrolling with offset calculation
+    const performScroll = () => {
         const section = document.getElementById('shop-section');
-        if(section) section.scrollIntoView({ behavior: 'smooth' });
+        if(section) {
+            // Calculate position to offset the sticky header (~90px)
+            const headerOffset = 100;
+            const elementPosition = section.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+        }
+    };
+
+    if(els.homeView && els.homeView.style.display === 'none') {
+        window.location.hash = ''; // Go home first (triggers view switch)
+        // Wait slightly for view to render before scrolling
+        setTimeout(performScroll, 100);
+    } else {
+        performScroll();
     }
 }
 
@@ -325,7 +336,7 @@ function handleSearch(query) {
     searchQuery = query.toLowerCase().trim();
     if(els.grid) {
         if(els.homeView && els.homeView.style.display === 'none') {
-            showHome();
+            window.location.hash = '';
         }
         renderGrid();
     }
@@ -755,7 +766,7 @@ function renderFavoritesList() {
 }
 
 /* --- Product Modal --- */
-function openModal(id, skipPushState = false) {
+function openModal(id, skipHashUpdate = false) {
     if (!window.PRODUCTS) return;
     const product = window.PRODUCTS.find(p => p.id === id);
     if (!product) return;
@@ -789,12 +800,8 @@ function openModal(id, skipPushState = false) {
     }
 
     // Update URL Hash if needed
-    if (!skipPushState) {
-        try {
-            history.pushState(null, null, `#product-${id}`);
-        } catch(e) {
-            // History API restricted - ignoring
-        }
+    if (!skipHashUpdate) {
+        window.location.hash = `#product-${id}`;
     }
 }
 
@@ -835,17 +842,26 @@ function renderModalSizes() {
     }
 }
 
-function closeModal(e, updateHistory = true) {
+function closeModal(e, skipHashUpdate = false) {
     if (e && e.target !== els.modal && !e.target.classList.contains('modal-close')) return;
     if(els.modal) els.modal.classList.remove('open');
     document.body.style.overflow = '';
     
-    if (updateHistory) {
-        // Clear hash without reloading
-        try {
-            history.pushState("", document.title, window.location.pathname + window.location.search);
-        } catch(e) {
-            // History API restricted - ignoring
+    if (!skipHashUpdate) {
+        // Return to hash of current view or clear
+        // Simplified: return to home view's hash (empty) or about if we were there?
+        // Since modal is mostly accessed from grid, clearing or restoring previous would be ideal.
+        // For simplicity, we just clear hash or set to previous logic?
+        // Let's assume modal closes to current view.
+        // But hash was #product-ID. 
+        // If we want to support back button, history.back() is better, but tricky.
+        // We will just clear hash to '', effectively going 'Home' or just clear query.
+        
+        // Check where we are "visually". If we are on Home View, clear hash.
+        if (els.aboutView && els.aboutView.style.display === 'block') {
+             window.location.hash = 'about';
+        } else {
+             window.location.hash = '';
         }
     }
 }
@@ -866,11 +882,11 @@ function updateModalQty(change) {
 function addToCartFromModal() {
     if (modalState.id) {
         addToCart(modalState.id, modalState.size, modalState.qty);
-        // We do NOT close modal immediately as per usual e-commerce UX (keep user there unless they want to leave)
-        // Or we can close it. Let's keep it open but show toast.
-        // Actually for mobile bottom sheet it's better to stay or close?
-        // Let's close it to encourage checking out? No, let's keep it.
-        // The Sticky bar makes it easy to add multiple.
+        // Do not close modal automatically, consistent with previous behavior
+        // But user can click X or outside
+        // To be extra nice, we can close it:
+        // closeModal({ target: els.modal });
+        // But let's keep it open as per previous logic.
         closeModal({ target: els.modal });
     }
 }
